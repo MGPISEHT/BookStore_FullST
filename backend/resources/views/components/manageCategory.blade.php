@@ -36,8 +36,6 @@
                             <th scope="col">Name</th>
                             <th scope="col">Slug</th>
                             <th scope="col">Description</th>
-                            <th scope="col">Created At</th>
-                            <th scope="col">Updated At</th>
                             <th scope="col">Actions</th>
                         </tr>
                     </thead>
@@ -48,8 +46,6 @@
                             <td>{{ $category->name }}</td>
                             <td>{{ $category->slug }}</td>
                             <td>{{ $category->description }}</td>
-                            <td>{{ $category->created_at }}</td>
-                            <td>{{ $category->updated_at }}</td>
                             <td>
                                 <button class="btn btn-sm btn-primary" data-toggle="modal" data-target="#editCategoryModal{{ $category->id }}">Edit</button>
 

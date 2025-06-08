@@ -11,7 +11,7 @@
             <div class="d-flex justify-content-between align-items-center flex-wrap p-3">
                 <h1>Payment</h1>
                 <div class="serach_field-area d-flex align-items-center justify-content-between">
-                    <button class="btn btn-sm btn-success " data-toggle="modal" data-target="#addPaymentModal">Add New</button>
+                    <!-- <button class="btn btn-sm btn-success " data-toggle="modal" data-target="#addPaymentModal">Add New</button> -->
 
                     <div class="search_inner ml-4">
                         <form action="#">
@@ -37,8 +37,6 @@
                             <th scope="col">Amount</th>
                             <th scope="col">Transaction ID</th>
                             <th scope="col">Status</th>
-                            <th scope="col">Created At</th>
-                            <th scope="col">Updated At</th>
                             <th scope="col">Actions</th>
                         </tr>
                     </thead>
@@ -52,8 +50,6 @@
                             <td>${{ number_format($payment->amount, 2) }}</td>
                             <td>{{ $payment->transaction_id }}</td>
                             <td>{{ ucfirst($payment->status) }}</td>
-                            <td>{{ $payment->created_at }}</td>
-                            <td>{{ $payment->updated_at }}</td>
                             <td>
                                 <button class="btn btn-sm btn-primary" data-toggle="modal" data-target="#editPaymentModal{{ $payment->id }}">Edit</button>
                                 <button class="btn btn-sm btn-danger" data-toggle="modal" data-target="#deletePaymentModal{{ $payment->id }}">Delete</button>

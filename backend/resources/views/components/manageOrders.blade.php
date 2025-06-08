@@ -35,10 +35,6 @@
                             <th>Total Amount</th>
                             <th>Status</th>
                             <th>Shipping Address ID</th>
-                            <th>Payment ID</th>
-                            <th>Shipping Method</th>
-                            <th>Created At</th>
-                            <th>Updated At</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -50,10 +46,6 @@
                             <td>{{ $order->total_amount }}</td>
                             <td>{{ ucfirst($order->status) }}</td>
                             <td>{{ $order->shipping_address_id }}</td>
-                            <td>{{ $order->payment_id }}</td>
-                            <td>{{ $order->shipping_method }}</td>
-                            <td>{{ $order->created_at }}</td>
-                            <td>{{ $order->updated_at }}</td>
                             <td>
                                 <button class="btn btn-sm btn-primary" data-toggle="modal" data-target="#editOrderModal{{ $order->id }}">Edit</button>
                                 <button class="btn btn-sm btn-danger" data-toggle="modal" data-target="#deleteOrderModal{{ $order->id }}">Delete</button>

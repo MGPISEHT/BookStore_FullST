@@ -1,13 +1,16 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom'; // Import Link for navigation
 
 const Cart = ({ cartItems, setCartItems }) => {
   const [total, setTotal] = useState(0);
 
+  // Load cart items from localStorage on initial mount
   useEffect(() => {
     const storedCart = JSON.parse(localStorage.getItem('cart')) || [];
     setCartItems(storedCart);
-  }, [setCartItems]);
+  }, [setCartItems]); // Dependency array includes setCartItems to avoid lint warnings
 
+  // Update localStorage and total whenever cartItems change
   useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(cartItems));
     const newTotal = cartItems.reduce(
@@ -17,17 +20,39 @@ const Cart = ({ cartItems, setCartItems }) => {
     setTotal(newTotal);
   }, [cartItems]);
 
+  // Load PayPal SDK script
   useEffect(() => {
-    // Load PayPal SDK script
-    const script = document.createElement('script');
-    script.src = `https://www.paypal.com/sdk/js?client-id=AfkfEA59DV9179OsB5kuRYFTzdu4Ap7KZTKe9peAbqHH7Q0L5JFJeQcDFKP9qEpvObffMNaTVILlUfqC`;
-    script.async = true;
-    script.onload = () => initializePayPalButton();
-    document.body.appendChild(script);
-  }, [total]);
+    // Only load the script if it hasn't been loaded already
+    if (!document.getElementById('paypal-sdk')) {
+      const script = document.createElement('script');
+      script.id = 'paypal-sdk'; // Add an ID to prevent multiple loads
+      script.src = `https://www.paypal.com/sdk/js?client-id=AfkfEA59DV9179OsB5kuRYFTzdu4Ap7KZTKe9peAbqHH7Q0L5JFJeQcDFKP9qEpvObffMNaTVILlUfqC&currency=USD`; // Add currency
+      script.async = true;
+      script.onload = () => initializePayPalButton();
+      script.onerror = (err) => console.error('PayPal SDK Load Error:', err);
+      document.body.appendChild(script);
+    } else {
+      // If already loaded, re-initialize buttons in case total changed
+      initializePayPalButton();
+    }
+
+    // Cleanup function to remove script if component unmounts (optional but good practice)
+    return () => {
+      const script = document.getElementById('paypal-sdk');
+      if (script) {
+        script.remove();
+      }
+    };
+  }, [total]); // Re-run when total changes to update payment amount
 
   const initializePayPalButton = () => {
-    if (window.paypal) {
+    // Clear existing buttons to prevent re-rendering issues
+    const paypalContainer = document.getElementById('paypal-button-container');
+    if (paypalContainer) {
+      paypalContainer.innerHTML = '';
+    }
+
+    if (window.paypal && total > 0) { // Only render if total is greater than 0
       window.paypal
         .Buttons({
           createOrder: (data, actions) => {
@@ -35,7 +60,7 @@ const Cart = ({ cartItems, setCartItems }) => {
               purchase_units: [
                 {
                   amount: {
-                    value: total.toFixed(2),
+                    value: total.toFixed(2), // Ensure value is a string with 2 decimal places
                   },
                 },
               ],
@@ -44,17 +69,22 @@ const Cart = ({ cartItems, setCartItems }) => {
           onApprove: (data, actions) => {
             return actions.order.capture().then((details) => {
               alert(
-                `Transaction completed by ${details.payer.name.given_name}`
+                `Transaction completed by ${details.payer.name.given_name}. Order ID: ${details.id}`
               );
-              setCartItems([]);
+              setCartItems([]); // Clear cart after successful payment
               localStorage.removeItem('cart');
+              // Redirect to a thank you page
               window.location.href = '/thankyou';
             });
           },
           onError: (err) => {
-            console.error(err);
-            alert('Something went wrong with the payment.');
+            console.error('PayPal Button Error:', err);
+            alert('Something went wrong with the payment. Please try again.');
           },
+          onCancel: (data) => {
+            console.log('Payment cancelled:', data);
+            alert('Payment cancelled.');
+          }
         })
         .render('#paypal-button-container');
     }
@@ -68,7 +98,7 @@ const Cart = ({ cartItems, setCartItems }) => {
     setCartItems((prevItems) =>
       prevItems.map((item) =>
         item.id === id
-          ? { ...item, quantity: Math.max(item.quantity + delta, 1) }
+          ? { ...item, quantity: Math.max(item.quantity + delta, 1) } // Ensure quantity doesn't go below 1
           : item
       )
     );
@@ -84,9 +114,9 @@ const Cart = ({ cartItems, setCartItems }) => {
         <div className="container">
           <div className="row">
             <div className="col-md-12 mb-0">
-              <a href="/" className="text-decoration-none">
+              <Link to="/" className="text-decoration-none">
                 Home
-              </a>
+              </Link>
               <span className="mx-2">/</span>
               <strong className="text-black">Cart</strong>
             </div>
@@ -111,65 +141,72 @@ const Cart = ({ cartItems, setCartItems }) => {
                     </tr>
                   </thead>
                   <tbody>
-                    {cartItems.map((item) => (
-                      <tr key={item.id} style={{ height: '100px' }}>
-                        <td className="product-thumbnail">
-                          <img
-                            src={item.image}
-                            alt={item.title}
-                            className="img-fluid"
-                            style={{ width: '50px' }}
-                          />
-                        </td>
-                        <td className="product-name">
-                          <h2 className="h6 text-black">{item.title}</h2>
-                        </td>
-                        <td>${item.price.toFixed(2)}</td>
-                        <td>
-                          <div
-                            className="input-group mb-3"
-                            style={{ maxWidth: '150px', marginTop: '16px' }}
-                          >
-                            <div className="input-group-prepend">
-                              <button
-                                style={{ width: '34px', height: '40px' }}
-                                className="btn btn-outline-primary me-2"
-                                type="button"
-                                onClick={() => updateQuantity(item.id, -1)}
-                              >
-                                -
-                              </button>
-                            </div>
-                            <input
-                              type="text"
-                              className="form-control text-center me-2"
-                              value={item.quantity}
-                              readOnly
+                    {cartItems.length > 0 ? (
+                      cartItems.map((item) => (
+                        <tr key={item.id} style={{ height: '100px' }}>
+                          <td className="product-thumbnail">
+                            {/* Assuming 'image' property is available on cart items */}
+                            <img
+                              src={`http://127.0.0.1:8000/storage/${item.image || item.cover_image}`} // Use item.image or fallback to item.cover_image
+                              alt={item.title}
+                              className="img-fluid"
+                              style={{ width: '50px', height: 'auto' }}
                             />
-                            <div className="input-group-append">
-                              <button
-                                style={{ width: '34px', height: '40px' }}
-                                className="btn btn-outline-primary"
-                                type="button"
-                                onClick={() => updateQuantity(item.id, 1)}
-                              >
-                                +
-                              </button>
+                          </td>
+                          <td className="product-name">
+                            <h2 className="h6 text-black">{item.title}</h2>
+                          </td>
+                          <td>${item.price ? parseFloat(item.price).toFixed(2) : '0.00'}</td>
+                          <td>
+                            <div
+                              className="input-group mb-3"
+                              style={{ maxWidth: '150px', marginTop: '16px' }}
+                            >
+                              <div className="input-group-prepend">
+                                <button
+                                  style={{ width: '34px', height: '40px' }}
+                                  className="btn btn-outline-primary me-2"
+                                  type="button"
+                                  onClick={() => updateQuantity(item.id, -1)}
+                                >
+                                  -
+                                </button>
+                              </div>
+                              <input
+                                type="text"
+                                className="form-control text-center me-2"
+                                value={item.quantity}
+                                readOnly
+                              />
+                              <div className="input-group-append">
+                                <button
+                                  style={{ width: '34px', height: '40px' }}
+                                  className="btn btn-outline-primary"
+                                  type="button"
+                                  onClick={() => updateQuantity(item.id, 1)}
+                                >
+                                  +
+                                </button>
+                              </div>
                             </div>
-                          </div>
-                        </td>
-                        <td>${(item.price * item.quantity).toFixed(2)}</td>
-                        <td>
-                          <button
-                            className="btn btn-primary"
-                            type="button"
-                            onClick={() => removeItem(item.id)}
-                          >
-                            X
-                          </button>
-                        </td>
+                          </td>
+                          <td>${(item.price * item.quantity).toFixed(2)}</td>
+                          <td>
+                            <button
+                              className="btn btn-primary"
+                              type="button"
+                              onClick={() => removeItem(item.id)}
+                            >
+                              X
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="6" className="text-center py-5">Your cart is empty.</td>
                       </tr>
-                    ))}
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -183,17 +220,15 @@ const Cart = ({ cartItems, setCartItems }) => {
                   <button
                     className="btn btn-primary btn-sm btn-block"
                     type="button"
+                    // No explicit action for update cart, as quantity changes are live
                   >
                     Update Cart
                   </button>
                 </div>
                 <div className="col-md-6">
-                  <button
-                    className="btn btn-outline-primary btn-sm btn-block"
-                    type="button"
-                  >
+                  <Link to="/shop" className="btn btn-outline-primary btn-sm btn-block">
                     Continue Shopping
-                  </button>
+                  </Link>
                 </div>
               </div>
 

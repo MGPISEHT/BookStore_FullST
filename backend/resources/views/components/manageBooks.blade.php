@@ -37,8 +37,6 @@
                             <th scope="col">Price</th>
                             <th scope="col">Stock</th>
                             <th scope="col">Cover Image</th>
-                            <th scope="col">Created Date</th>
-                            <th scope="col">Updated Date</th>
                             <th scope="col">Actions</th>
                         </tr>
                     </thead>
@@ -50,8 +48,6 @@
                             <td>{{ $book->price }}</td> <!-- Likewise, could be category name -->
                             <td>{{ $book->stock }}</td>
                             <td>{{ $book->cover_image }}</td>
-                            <td>{{ $book->created_at }}</td>
-                            <td>{{ $book->updated_at }}</td>
                             <td class="d-flex">
 
 

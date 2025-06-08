@@ -82,7 +82,7 @@
         </li>
 
         <!-- Payments -->
-        <li class>
+        <!-- <li class>
             <a href="{{ route('payments.index') }}" aria-expanded="false">
                 <div class="icon_menu">
                     <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="currentColor" class="bi bi-credit-card" viewBox="0 0 16 16">
@@ -93,7 +93,7 @@
                 <span>Payments</span>
             </a>
 
-        </li>
+        </li> -->
         <!-- Users -->
         <li class>
             <a href="{{ route('users.index') }}" aria-expanded="false">

@@ -34,8 +34,6 @@
                             <th>State</th>
                             <th>Country</th>
                             <th>Phone</th>
-                            <th>Created At</th>
-                            <th>Updated At</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -49,8 +47,6 @@
                             <td>{{ $shipping->state }}</td>
                             <td>{{ $shipping->country }}</td>
                             <td>{{ $shipping->phone }}</td>
-                            <td>{{ $shipping->created_at }}</td>
-                            <td>{{ $shipping->updated_at }}</td>
                             <td>
                                 <button class="btn btn-sm btn-primary editShippingAddress" data-id="{{ $shipping->id }}" data-toggle="modal" data-target="#editShippingAddressModal{{ $shipping->id }}">Edit</button>
                                 <button class="btn btn-sm btn-danger deleteShippingAddress" data-id="{{ $shipping->id }}" data-toggle="modal" data-target="#deleteShippingAddressModal{{ $shipping->id }}">Delete</button>
